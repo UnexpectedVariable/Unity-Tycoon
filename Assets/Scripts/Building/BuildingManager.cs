@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Building.Util;
+using Assets.Scripts.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,16 @@ namespace Assets.Scripts.Building
     {
         [SerializeField]
         private BuildingButton _button = null;
+        [SerializeField]
+        private ResourcesHolder _resourcesHolder = null;
 
         [SerializeField]
         private InputAction _press = null;
         [SerializeField]
         private InputAction _position = null;
 
-        [SerializeField]
+        private uint _cost = 0;
         private GameObject _building = null;
-        [SerializeField]
         private BuildingSpot _buildingSpot = null;
 
         private Camera _mainCamera = null;
@@ -47,10 +49,13 @@ namespace Assets.Scripts.Building
         {
             _button.OnPressedEvent += (sender, args) =>
             {
+                if (!_resourcesHolder.TryGetResource(Resources.Util.Data.Resources.Gold, args)) return;
+                _cost = args;
                 _position.Enable();
             };
             _button.OnPrefabInstanstiatedEvent += (sender, args) =>
             {
+                if(!_position.enabled) return;
                 _building = Instantiate(args, _button.transform.position, Quaternion.identity);
                 _building.transform.localScale = _airbornScale;
             };
@@ -70,12 +75,10 @@ namespace Assets.Scripts.Building
 
             _position.performed += (context) =>
             {
-                Debug.Log("Mouse position changed");
                 Vector3 mousePos = _position.ReadValue<Vector2>();
                 Vector3 finalPos = mousePos;
                 SnapBuildingToCursor(mousePos, ref finalPos);
                 SnapBuildingToSpot(mousePos, ref finalPos);
-                Debug.Log($"Setting building final pos to {finalPos}");
                 _building.transform.position = finalPos;
             };
         }
@@ -90,12 +93,14 @@ namespace Assets.Scripts.Building
             else
             {
                 Debug.Log($"{_building} discarded!");
+                _resourcesHolder.AddResource(Resources.Util.Data.Resources.Gold, _cost);
                 Destroy(_building);
             }
         }
 
         private void SnapBuildingToSpot(Vector3 mousePos, ref Vector3 buildingPos)
         {
+            //TODO:Cover case if spot is occupied
             var ray = _mainCamera.ScreenPointToRay(mousePos);
             if (!Physics.Raycast(ray, out var hit)) return;
 

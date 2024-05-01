@@ -10,16 +10,16 @@ namespace Assets.Scripts.Building
 {
     internal class BuildingButton : MonoBehaviour, IPointerDownHandler
     {
-        public event EventHandler OnPressedEvent = null;
+        public event EventHandler<uint> OnPressedEvent = null;
         public event EventHandler<GameObject> OnPrefabInstanstiatedEvent = null;
 
         [SerializeField]
-        private GameObject _prefab = null;
+        private Building _building = null;
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            OnPressedEvent?.Invoke(this, EventArgs.Empty);
-            OnPrefabInstanstiatedEvent?.Invoke(this, _prefab);
+            OnPressedEvent?.Invoke(this, _building.Cost);
+            OnPrefabInstanstiatedEvent?.Invoke(this, _building.Prefab);
         }
     }
 }

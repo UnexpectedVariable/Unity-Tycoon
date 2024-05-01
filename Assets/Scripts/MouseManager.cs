@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
@@ -29,7 +30,8 @@ namespace Assets.Scripts
                 var ray = _mainCamera.ScreenPointToRay(mousePos);
                 if (!Physics.Raycast(ray, out var hit)) return;
 
-                if (_currentSelection != null) _currentSelection.OnDeselected();
+                //if (_currentSelection != null) _currentSelection.OnDeselected();
+                Debug.Log($"Mouse click hit {hit.transform.name}");
                 _currentSelection = hit.collider.gameObject.GetComponent<ISelectable>();
                 if (_currentSelection == null) return;
                 _currentSelection.OnSelected();

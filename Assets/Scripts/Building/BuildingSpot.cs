@@ -16,7 +16,7 @@ namespace Assets.Scripts.Building
         private GameObject _building = null;
 
         [SerializeField]
-        private Canvas _canvas = null;
+        private BuildingSpotUI _ui = null;
 
         private bool _occupied = false;
         public bool Occupied => _occupied;
@@ -29,7 +29,12 @@ namespace Assets.Scripts.Building
         {
             gameObject.tag = Data.TagToString(_defaultTag);
 
-            if(_canvas == null) _canvas = GetComponentInChildren<Canvas>(true);
+            if(_ui == null) _ui = GetComponent<BuildingSpotUI>();
+            _ui.OnDestroyEvent += (sender, args) =>
+            {
+                OnDeselectedEvent?.Invoke(this, args);
+                Clear();
+            };
 
             OnBuiltUpEvent += (sender, args) =>
             {
@@ -37,11 +42,11 @@ namespace Assets.Scripts.Building
             };
             OnSelectedEvent += (sender, args) =>
             {
-                _canvas.gameObject.SetActive(true);
+                _ui.SetCanvasActive(true);
             };
             OnDeselectedEvent += (sender, args) =>
             {
-                _canvas.gameObject.SetActive(false);
+                _ui.SetCanvasActive(false);
             };
         }
 
@@ -51,8 +56,15 @@ namespace Assets.Scripts.Building
             OnBuiltUpEvent?.Invoke(this, EventArgs.Empty);
         }
 
+        public void Clear()
+        {
+            Destroy(_building);
+            _building = null;
+        }
+
         public void OnSelected()
         {
+            if (!Occupied) return;
             OnSelectedEvent?.Invoke(this, EventArgs.Empty);
         }
 
